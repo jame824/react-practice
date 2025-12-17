@@ -1,6 +1,6 @@
 import React from 'react';
 import Search from './components/Search.jsx'
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 
 const App = () => {
