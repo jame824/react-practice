@@ -18,13 +18,15 @@ const  API_OPTIONS = {
 
 const App = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [debouncedSearchTerm] = useDebounce(searchTerm, 500);
+
   const [movieList, setMovieList] = useState([]);
+  const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const [trendingMovies, setTrendingMovies] = useState([]);
-  
-  const [debouncedSearchTerm] = useDebounce(searchTerm, 500);
+  const [trendingErrorMessage, setTrendingErrorMessage] = useState('');
+  const [loadingTrending, setLoadingTrending] = useState(false);
 
   const fetchMovies = async (query = '') => {
     setIsLoading(true);
@@ -63,12 +65,18 @@ const App = () => {
   }
 
   const loadTrendingMovies = async () => {
+    setLoadingTrending(true);
+    setTrendingErrorMessage('');
+
     try {
       const movies = await getTrendingMovies();
 
       setTrendingMovies(movies);
     } catch (error) {
       console.error(`Error fetching trending movies: ${error}`);
+      setTrendingErrorMessage('Error fetching trending movies.');
+    } finally {
+      setLoadingTrending(false);
     }
   }
 
@@ -93,19 +101,25 @@ const App = () => {
           <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
         </header>
 
-        {trendingMovies.length > 0 && (
-          <section className="trending">
-            <h2>Trending Movies</h2>
-            <ul>
-              {trendingMovies.map((movie, index) => (
-                <li key={movie.id}>
-                  <p>{index + 1}</p>
-                  <img src={movie.poster_url} alt={movie.title}/>
-                </li>
-              ))}
-            </ul>
+        <section className="trending">
+          <h2>Trending Movies</h2>
+            {loadingTrending ? (
+              <Spinner/>
+            ) : trendingErrorMessage ? (
+              <p className='text-red-500'>
+                {trendingErrorMessage}
+              </p>
+            ) : trendingMovies.length > 0 && (
+                <ul>
+                  {trendingMovies.map((movie, index) => (
+                    <li key={movie.id}>
+                      <p>{index + 1}</p>
+                      <img src={movie.poster_url} alt={movie.title}/>
+                    </li>
+                  ))}
+                </ul>
+            )}
           </section>
-        )}
         
         <section className='all-movies'>
           <h2 className='mt-[40px]'>All Movies</h2>
