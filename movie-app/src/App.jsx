@@ -1,146 +1,146 @@
-import Search from './components/Search';
-import Spinner from './components/Spinner';
-import MovieCard from './components/MovieCard';
 import { useState, useEffect } from 'react';
+import Search from './components/search';
+import MovieCard from './components/MovieCard';
+import Spinner from './components/Spinner';
 import { useDebounce } from 'use-debounce';
 import { getTrendingMovies, updateSearchCount } from './appwrite';
 
 const API_BASE_URL = 'https://api.themoviedb.org/3';
+
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 
-const  API_OPTIONS = {
-  method: 'GET', // api endpoint
+const API_OPTIONS = {
+  method: 'GET',
   headers: {
-    accept: 'application/json', // the object we accept
-    Authorization: `Bearer ${API_KEY}` // how we get in
+    accept: 'application/json',
+    Authorization: `Bearer ${API_KEY}`
   }
-}
+};
 
 const App = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm] = useDebounce(searchTerm, 500);
-
-  const [movieList, setMovieList] = useState([]);
-  const [errorMessage, setErrorMessage] = useState('');
+  
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [moviesList, setMoviesList] = useState([]);
 
-  const [trendingMovies, setTrendingMovies] = useState([]);
+  const [trendingIsLoading, setTrendingIsLoading] = useState(false);
   const [trendingErrorMessage, setTrendingErrorMessage] = useState('');
-  const [loadingTrending, setLoadingTrending] = useState(false);
-
+  const [trendingMoviesList, setTrendingMoviesList] = useState([]);
+  
   const fetchMovies = async (query = '') => {
-    setIsLoading(true);
     setErrorMessage('');
+    setIsLoading(true);
     try {
-      const endpoint = query ? `${API_BASE_URL}/search/movie?query=${encodeURIComponent(query)}`
+      const endpoint = query ? 
+      `${API_BASE_URL}/search/movie?query=${encodeURIComponent(query)}`
       : `${API_BASE_URL}/discover/movie?sort_by=popularity.desc`;
 
       const response = await fetch(endpoint, API_OPTIONS);
 
-      if (!response.ok){
-        throw new Error('Failed to fetch movies.');
+      if (!response.ok) {
+        throw new Error("Failed to fetch movies");
       }
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (data.Response === 'false') {
-        setErrorMessage(data.Error || 'Failed to fetch movies.');
-        setMovieList([]);
+        setErrorMessage(data.Error || "Failed to fetch movies");
+        setMoviesList([]);
         return;
       }
 
-      console.log(data);
-      
-      setMovieList(data.results || []); // key in the json containing movies
-      
-      if (query && data.results.length > 0){
-        await updateSearchCount(query, data.results[0]);
+      setMoviesList(data.results || []);
+
+      if (data.results.length > 0 && query) {
+        updateSearchCount(query, data.results[0]);
       }
-    } catch(error) {
-      console.error(`Error fetching movies: ${error}`);
-      setErrorMessage('Error fetching movies. Please try again later.');
+    } catch(e) { 
+      setErrorMessage(`Error fetching movies: ${e}`)
+      throw new Error(e);
     } finally {
       setIsLoading(false);
     }
   }
 
   const loadTrendingMovies = async () => {
-    setLoadingTrending(true);
+    setTrendingIsLoading(true);
     setTrendingErrorMessage('');
-
     try {
       const movies = await getTrendingMovies();
 
-      setTrendingMovies(movies);
-    } catch (error) {
-      console.error(`Error fetching trending movies: ${error}`);
-      setTrendingErrorMessage('Error fetching trending movies.');
+      setTrendingMoviesList(movies);
+    } catch (e) {
+      setTrendingErrorMessage(`Error fetching movies: ${e}`)
+      throw new Error(e);
     } finally {
-      setLoadingTrending(false);
+      setTrendingIsLoading(false);
     }
   }
 
-  useEffect( () => {
-    fetchMovies(debouncedSearchTerm);
-  }, [debouncedSearchTerm]); // being put in the dependency array recalls fetchmovies every time that it is changed
+  useEffect(() => {
+    fetchMovies(searchTerm)
+  }, [searchTerm]);
 
   useEffect(() => {
     loadTrendingMovies();
   }, []);
   
+
   return (
     <main>
-      <div className="pattern"/>
+      <div className='pattern'/>
 
-      <div className="wrapper">
+      <section className='wrapper'>
         <header>
-          <img src="./hero.png" alt="Hero Banner"/>
-          <h1>Find <span className="text-gradient">Movies</span> You'll Enjoy 
-          Without the Hassle </h1> 
-          
-          <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+          <img src="hero.png" alt="hero banner"/>
+
+          <h1> Find <span className='text-gradient'>Movies</span> You'll Enjoy Without The Hassle</h1>
+
+          <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm}/>
         </header>
 
-        <section className="trending">
-          <h2>Trending Movies</h2>
-            {loadingTrending ? (
+        {trendingMoviesList.length > 0 && (
+          <section className='trending'>
+            <h2>Trending Movies</h2>
+
+            {trendingIsLoading ? (
               <Spinner/>
             ) : trendingErrorMessage ? (
-              <p className='text-red-500'>
-                {trendingErrorMessage}
-              </p>
-            ) : trendingMovies.length > 0 && (
-                <ul>
-                  {trendingMovies.map((movie, index) => (
-                    <li key={movie.id}>
-                      <p>{index + 1}</p>
-                      <img src={movie.poster_url} alt={movie.title}/>
-                    </li>
-                  ))}
-                </ul>
+              <p className='text-red-500'>{errorMessage}</p>
+            ) : (
+              <ul>
+                {trendingMoviesList.map((movie, index) =>
+                <li key={movie.$id}>
+                  <p>{index + 1}</p>
+                  <img src={movie.poster_url} alt="movie-poster"/>
+                </li>)}
+              </ul>
             )}
-          </section>
-        
-        <section className='all-movies'>
-          <h2 className='mt-[40px]'>All Movies</h2>
+          </section>)
+        }
 
+        <section className='all-movies'>
+          <h2>All Movies</h2>
+          
           {isLoading ? (
             <Spinner/>
           ) : errorMessage ? (
-            <p className='text-red-500'>
-              {errorMessage}
-            </p>
+            <p className='text-red-500'>{errorMessage}</p>
           ) : (
             <ul>
-              {movieList.map((movie) => ( // for each object "movie" or literally 0-19
-                <MovieCard key={movie.id} movie={movie}/> //assign id and use json data structure  
-                ))}
+              {moviesList.map((movie) => (
+                <MovieCard key={movie.key} movie={movie}/>)
+              )}
             </ul>
           )}
+
         </section>
-      </div>
+
+      </section>
     </main>
   )
-}
+};
 
 export default App;
