@@ -22,7 +22,7 @@ const handleError = (error: unknown, message: string) => {
   throw error;
 }
 
-const sendEmailOTP = async ({email}: {email: string}) => {
+const sendEmailOTP = async (email: string) => {
   const { account } = await createAdminClient();
 
   try {
@@ -43,7 +43,7 @@ export const createAccount = async (
   }) => {
     const existingUser = await getUserByEmail(email);
 
-    const accountId = await sendEmailOTP( { email });
+    const accountId = await sendEmailOTP(email);
 
     if (!accountId) throw new Error("Failed to send an OTP");
 
