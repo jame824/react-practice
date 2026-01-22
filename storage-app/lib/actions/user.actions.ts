@@ -1,10 +1,11 @@
 "use server";
 
-import { createAdminClient } from "../appwrite";
+import { createAdminClient, createSessionClient } from "../appwrite";
 import { appwriteConfig } from "../appwrite/config";
 import { Query, ID } from "node-appwrite";
 import { parseStringify } from "../utils";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 const getUserByEmail = async (email: string) => {
   const { databases } = await createAdminClient();
@@ -44,7 +45,7 @@ export const createAccount = async (
   }) => {
     const existingUser = await getUserByEmail(email);
 
-    const accountId = await sendEmailOTP(email);
+    const accountId = await sendEmailOTP({email});
 
     if (!accountId) throw new Error("Failed to send an OTP");
 
@@ -91,3 +92,38 @@ export const verifySecret = async ({
     console.log(error, "Failed to verify OTP");
   }
 };
+
+export const getCurrentUser = async () => {
+  try {
+    const { account } = await createSessionClient();
+    const { databases } = await createAdminClient();
+
+    const result = await account.get();
+
+    const user = await databases.listDocuments(
+      appwriteConfig.databaseId,
+      appwriteConfig.usersCollectionId,
+      [Query.equal("accountId", [result.$id])]
+    );
+
+    if(user.total < 0) return null;
+
+    return parseStringify(user.documents[0])
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+export const signOutUser = async () => {
+  const { account }  = await createSessionClient();
+
+  try {
+    await account.deleteSession('current');
+
+    (await cookies()).delete("appwrite-session");
+  } catch (e) {
+    console.log(e, "Failed to sign out user");
+  } finally {
+    redirect("/sign-in");
+  }
+}
