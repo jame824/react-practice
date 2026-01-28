@@ -1,16 +1,26 @@
 "use server";
 
-import { UploadFileProps } from "@/types";
 import { createAdminClient, createSessionClient } from "@/lib/appwrite";
 import { InputFile } from "node-appwrite/file";
 import { appwriteConfig } from "@/lib/appwrite/config";
 import { ID, Models, Query } from "node-appwrite";
 import { constructFileUrl, getFileType, parseStringify } from "../utils";
 import { revalidatePath } from "next/cache";
+import { getCurrentUser } from "./user.actions";
 
 const handleError = (error: unknown, message: string) => {
   console.log(error, message);
   throw error;
+}
+
+const createQueries = (currentUser: Models.Document) => {
+    const queries = [
+        Query.or([
+            Query.equal('owner', [currentUser.$id]),
+            Query.contains('users', [currentUser.email])]
+        )
+    ];
+    return queries
 }
 
 export const uploadFile = async ({file, ownerId, accountId, path}: UploadFileProps) => {
@@ -41,6 +51,7 @@ export const uploadFile = async ({file, ownerId, accountId, path}: UploadFilePro
             appwriteConfig.filesCollectionId,
             ID.unique(),
             fileDocument
+            
         )
         .catch(async (error: unknown) => { 
             await storage.deleteFile(appwriteConfig.bucketId, bucketFile.$id);
@@ -55,3 +66,28 @@ export const uploadFile = async ({file, ownerId, accountId, path}: UploadFilePro
         handleError(error, "failed to upload files");
     }
 };
+
+export const getFiles = async () => {
+    const { databases } = await createAdminClient();
+    try {
+        const currentUser = await getCurrentUser();
+
+        if(!currentUser) throw new Error("User not found");
+
+        const queries = createQueries(currentUser);
+
+        const files = await databases.listDocuments(
+            appwriteConfig.databaseId,
+            appwriteConfig.filesCollectionId,
+            queries
+        );
+
+        console.log(currentUser);
+        console.log(queries);
+        console.log(files); 
+
+        return parseStringify(files);
+    } catch (error) {
+        handleError(error, "failed to get files"); 
+    }
+}
