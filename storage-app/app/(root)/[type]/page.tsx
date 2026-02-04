@@ -3,11 +3,16 @@ import Sort from "@/components/Sort";
 import { getFiles } from "@/lib/actions/file.actions";
 import { Models } from "node-appwrite";
 import Card from "@/components/Card";
+import { getFileTypesParams } from "@/lib/utils";
 
-const page = async ({ params }: SearchParamProps) => {
+const Page = async ({ searchParams, params }: SearchParamProps) => {
   const type = ((await params)?.type as string) || "";
+  const searchText = ((await searchParams)?.query as string) || "";
+  const sort = ((await searchParams)?.sort as string) || "";
 
-  const files = await getFiles();
+  const types = getFileTypesParams(type) as FileType[];
+
+  const files = await getFiles({ types, searchText, sort });
 
   return (
     <div className="page-container">
@@ -19,7 +24,7 @@ const page = async ({ params }: SearchParamProps) => {
             Total: <span className="h5">0 MB</span>
           </p>
           <div className="sort-container">
-            <p className="body-1 hidden sm:block text-light-200">Sort By:</p>
+            <p className="body-1 text-light-200 hidden sm:block">Sort By:</p>
             <Sort />
           </div>
         </div>
@@ -39,4 +44,4 @@ const page = async ({ params }: SearchParamProps) => {
   );
 };
 
-export default page;
+export default Page;
