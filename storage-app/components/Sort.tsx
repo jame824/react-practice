@@ -1,10 +1,9 @@
-"use-client";
+"use client";
 
 import React from "react";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -33,11 +32,6 @@ const Sort = () => {
             value={sort.value}
           ></SelectItem>
         ))}
-        <SelectGroup>
-          <SelectItem value="light">Light</SelectItem>
-          <SelectItem value="dark">Dark</SelectItem>
-          <SelectItem value="system">System</SelectItem>
-        </SelectGroup>
       </SelectContent>
     </Select>
   );
