@@ -1,0 +1,223 @@
+  ---                                                                                                                                                                                                                 
+  Phase 1: React State Fundamentals
+                                                                                                                                                                                                                      
+  Files to Build From Scratch
+  ┌────────────────────────────────────┬──────────────────────────────────────────────────────────────────────┐
+  │                File                │                         What You're Learning                         │
+  ├────────────────────────────────────┼──────────────────────────────────────────────────────────────────────┤
+  │ components/ActionDropdown.tsx      │ Multi-state management (useState, useReducer), controlled components │
+  ├────────────────────────────────────┼──────────────────────────────────────────────────────────────────────┤
+  │ components/ActionsModalContent.tsx │ Presentational components, props interface design                    │
+  └────────────────────────────────────┴──────────────────────────────────────────────────────────────────────┘
+  Implementation Steps
+
+  Step 1.1: ActionsModalContent.tsx (Start here - simpler)
+  Build these pure presentational components:
+  ├── ImageThumbnail    → Takes file prop, renders thumbnail + name
+  ├── DetailRow         → Takes label + value props, renders a row
+  ├── FileDetails       → Composes ImageThumbnail + DetailRows
+  └── ShareInput        → Controlled input + list of shared users
+  React concepts: Props, composition, TypeScript interfaces
+
+  Step 1.2: ActionDropdown.tsx (The meaty one)
+  Build the state machine:
+  ├── State: isDropdownOpen, isModalOpen, action, name, emails, isLoading
+  ├── Handlers: closeAllModals, handleRemoveUser
+  ├── Render logic: which modal content based on action.value
+  └── NO API CALLS - just console.log where actions would fire
+  React concepts: useState for multiple related values, conditional rendering, event handlers
+
+  Step 1.3: Refactor to useReducer (Optional but valuable)
+  Convert the 5+ useState calls into:
+  const [state, dispatch] = useReducer(reducer, initialState)
+
+  Actions: OPEN_DROPDOWN, OPEN_MODAL, SET_ACTION, SET_LOADING, RESET
+  React concepts: When useReducer beats useState, action/reducer pattern
+
+  ---
+  Phase 2: Effects & Data Fetching
+
+  Files to Build From Scratch
+  ┌───────────────────────┬──────────────────────────────────────────────────────────┐
+  │         File          │                   What You're Learning                   │
+  ├───────────────────────┼──────────────────────────────────────────────────────────┤
+  │ components/Search.tsx │ useEffect, dependency arrays, debouncing, async in React │
+  └───────────────────────┴──────────────────────────────────────────────────────────┘
+  Implementation Steps
+
+  Step 2.1: Basic Search (No Debounce)
+  ├── useState for query, results, open
+  ├── useEffect that runs on [query] change
+  ├── Mock data fetch (setTimeout + fake data)
+  └── Render results list
+  React concepts: useEffect basics, dependency array
+
+  Step 2.2: Add Debounce (Build It Yourself)
+  ├── Create your own useDebounce hook:
+  │   function useDebounce(value, delay) {
+  │     const [debounced, setDebounced] = useState(value)
+  │     useEffect(() => {
+  │       const timer = setTimeout(() => setDebounced(value), delay)
+  │       return () => clearTimeout(timer)  // cleanup!
+  │     }, [value, delay])
+  │     return debounced
+  │   }
+  └── Use it: const debouncedQuery = useDebounce(query, 300)
+  React concepts: Custom hooks, cleanup functions, stale closure prevention
+
+  Step 2.3: Handle Loading/Error States
+  ├── Add isLoading, error state
+  ├── Show loading spinner while fetching
+  ├── Show error message on failure
+  └── Handle race conditions (user types fast, responses arrive out of order)
+  React concepts: Async state patterns, race condition handling
+
+  ---
+  Phase 3: Backend Patterns (API Layer)
+
+  Files to Build From Scratch
+  ┌─────────────────────────────┬──────────────────────────────────────┐
+  │            File             │         What You're Learning         │
+  ├─────────────────────────────┼──────────────────────────────────────┤
+  │ lib/actions/file.actions.ts │ CRUD, query building, error handling │
+  └─────────────────────────────┴──────────────────────────────────────┘
+  Implementation Steps
+
+  Step 3.1: Query Builder Function
+  // Build this from scratch:
+  const createQueries = (currentUser, types, searchText, sort, limit) => {
+    // Start with base query
+    // Conditionally add filters
+    // Parse sort string and add ordering
+    // Return composed query array
+  }
+  Backend concepts: Dynamic query composition, filter patterns
+
+  Step 3.2: CRUD Operations
+  Build each one, understanding the pattern:
+  ├── getFiles()     → READ: build query, fetch, return
+  ├── uploadFile()   → CREATE: upload to storage, create document, handle rollback
+  ├── renameFile()   → UPDATE: partial update, revalidate
+  ├── deleteFile()   → DELETE: remove document, remove from storage
+  └── updateFileUsers() → UPDATE: modify sharing permissions
+  Backend concepts: CRUD pattern, transaction-like cleanup, cache invalidation
+
+  Step 3.3: Error Handling
+  ├── Centralized handleError function
+  ├── Try/catch in each action
+  ├── Meaningful error messages
+  └── Consider: what does the frontend need to know?
+  Backend concepts: Error boundaries, error propagation
+
+  ---
+  Phase 4: Wiring Frontend ↔ Backend
+
+  Files to Modify
+  ┌───────────────────────────────┬──────────────────────────────────────────┐
+  │             File              │           What You're Learning           │
+  ├───────────────────────────────┼──────────────────────────────────────────┤
+  │ components/ActionDropdown.tsx │ Replace console.logs with real API calls │
+  ├───────────────────────────────┼──────────────────────────────────────────┤
+  │ components/Search.tsx         │ Replace mock data with real getFiles()   │
+  └───────────────────────────────┴──────────────────────────────────────────┘
+  Implementation Steps
+
+  Step 4.1: Connect ActionDropdown to file.actions
+  ├── Import renameFile, deleteFile, updateFileUsers
+  ├── Replace console.logs in handleActions with real calls
+  ├── Handle loading state (disable buttons, show spinner)
+  ├── Handle success (close modal, maybe show toast)
+  └── Handle error (show error message, don't close modal)
+  Concepts: Async event handlers, loading UX, error UX
+
+  Step 4.2: Connect Search to getFiles
+  ├── Import getFiles from file.actions
+  ├── Replace mock fetch with real call
+  ├── Handle empty results vs error vs loading
+  └── Ensure debounce still works
+  Concepts: Real data integration, maintaining UX during migration
+
+  ---
+  Phase 5: URL State Pattern
+
+  Files to Build From Scratch
+  ┌────────────────────────────┬─────────────────────────────────────┐
+  │            File            │        What You're Learning         │
+  ├────────────────────────────┼─────────────────────────────────────┤
+  │ components/Sort.tsx        │ Writing to URL                      │
+  ├────────────────────────────┼─────────────────────────────────────┤
+  │ app/(root)/[type]/page.tsx │ Reading from URL, server components │
+  └────────────────────────────┴─────────────────────────────────────┘
+  Implementation Steps
+
+  Step 5.1: Sort.tsx
+  ├── useRouter, usePathname hooks
+  ├── handleSort pushes ?sort=value to URL
+  ├── Select component reads from sortTypes constant
+  └── No useState needed - URL IS the state
+  Concepts: URL as state, controlled components without useState
+
+  Step 5.2: [type]/page.tsx
+  ├── Read searchParams (sort, query)
+  ├── Read params (type)
+  ├── Map type to file types array
+  ├── Pass all params to getFiles
+  └── Render results
+  Concepts: Server components, dynamic routes, searchParams
+
+  Step 5.3: Sync Search with URL
+  Update Search.tsx:
+  ├── On result click, push query to URL
+  ├── Read initial query from URL
+  ├── Clear query when URL query clears
+  Concepts: Bidirectional URL sync
+
+  ---
+  Phase 6: Dashboard (Capstone)
+
+  Files to Build From Scratch
+  ┌─────────────────────┬───────────────────────────────┐
+  │        File         │     What You're Learning      │
+  ├─────────────────────┼───────────────────────────────┤
+  │ app/(root)/page.tsx │ Composing everything together │
+  └─────────────────────┴───────────────────────────────┘
+  Implementation Steps
+
+  Step 6.1: Data Requirements
+  Figure out what dashboard needs:
+  ├── Total storage used (sum of all file sizes)
+  ├── File count by type (images: 12, documents: 8, etc.)
+  ├── Recent files (last 5-10 uploaded)
+  └── Maybe: storage limit, usage percentage
+
+  Step 6.2: Build/Extend Actions
+  Add to file.actions.ts or create dashboard.actions.ts:
+  ├── getTotalStorage() → aggregate file sizes
+  ├── getFileCountsByType() → group by type
+  ├── getRecentFiles() → getFiles with limit + sort by date
+
+  Step 6.3: Build Dashboard UI
+  ├── Stats cards (total storage, file counts)
+  ├── Recent files list (reuse Card component)
+  ├── Type breakdown (maybe chart or simple list)
+  └── Quick actions (upload button, links to sections)
+  Concepts: Data aggregation, component reuse, dashboard layout patterns
+
+  ---
+  File Summary
+  ┌───────┬─────────────────────────────────────────────┬────────────────────┐
+  │ Phase │                    Files                    │    Core Concept    │
+  ├───────┼─────────────────────────────────────────────┼────────────────────┤
+  │ 1     │ ActionDropdown.tsx, ActionsModalContent.tsx │ React state        │
+  ├───────┼─────────────────────────────────────────────┼────────────────────┤
+  │ 2     │ Search.tsx                                  │ useEffect + async  │
+  ├───────┼─────────────────────────────────────────────┼────────────────────┤
+  │ 3     │ file.actions.ts                             │ Backend CRUD       │
+  ├───────┼─────────────────────────────────────────────┼────────────────────┤
+  │ 4     │ (integrate 1+2+3)                           │ Frontend ↔         │
+  │       │                                             │ Backend            │
+  ├───────┼─────────────────────────────────────────────┼────────────────────┤
+  │ 5     │ Sort.tsx, [type]/page.tsx                   │ URL state          │
+  ├───────┼─────────────────────────────────────────────┼────────────────────┤
+  │ 6     │ page.tsx (root)                             │ Composition        │
+  └───────┴─────────────────────────────────────────────┴────────────────────┘
