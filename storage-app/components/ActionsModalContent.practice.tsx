@@ -83,6 +83,7 @@ export const ShareInput = ({ file, onInputChange, onRemove }: Props) => (
 
 export const ShareInput = ({ file, onInputChange, onRemove }: Props) => (
   <>
+    <Input onChange={(e) => onInputChange(e.target.value.trim().split(","))} />
     <ul>
       {file.users.map((email: string) => (
         <li key={email}>
