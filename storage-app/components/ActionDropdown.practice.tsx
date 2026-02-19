@@ -1,7 +1,52 @@
-import React from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
-const ActionDropdown = () => {
-  return <div>ActionDropdown</div>;
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useState } from "react";
+import Image from "next/image";
+import { Models } from "node-appwrite";
+import { actionsDropdownItems } from "@/constants";
+import Link from "next/link";
+import { constructDownloadUrl } from "@/lib/utils";
+import { Input } from "./ui/input";
+import { usePathname } from "next/navigation";
+import {
+  deleteFile,
+  renameFile,
+  updateFileUsers,
+} from "@/lib/actions/file.actions";
+import { FileDetails, ShareInput } from "./ActionsModalContent";
+
+const ActionDropdown = ({ files }: { files: Models.Document }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDropddownOpen, setIsDropddownOpen] = useState(true);
+  const [action, setAction] = useState<ActionType | null>(null);
+  const [name, setName] = useState("");
+  const [emails, setEmails] = useState<string[]>([]);
+
+  return (
+    <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+      <DropdownMenu open={isDropddownOpen} onOpenChange={setIsDropddownOpen}>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline">Open</Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent></DropdownMenuContent>
+      </DropdownMenu>
+    </Dialog>
+  );
 };
 
 export default ActionDropdown;
