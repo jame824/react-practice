@@ -30,12 +30,55 @@ import {
 } from "@/lib/actions/file.actions";
 import { FileDetails, ShareInput } from "./ActionsModalContent";
 
-const ActionDropdown = ({ files }: { files: Models.Document }) => {
+const ActionDropdown = ({ file }: { file: Models.Document }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDropddownOpen, setIsDropddownOpen] = useState(true);
   const [action, setAction] = useState<ActionType | null>(null);
   const [name, setName] = useState("");
   const [emails, setEmails] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const renderDialogContent = () => {
+    if (!action) return null;
+
+    const { label, value } = action;
+
+    return (
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{label}</DialogTitle>
+          {value === "rename" && (
+            <Input onChange={(e) => setName(e.target.value)} />
+          )}
+          {value === "share" && (
+            <ShareInput
+              file={file}
+              onInputChange={setEmails}
+              onRemove={handleRemoveUsers}
+            />
+          )}
+          {value === "delete" && (
+            <p>
+              Are you sure you want to delete{` `}
+              <span>{file.name}</span>
+            </p>
+          )}
+          {value === "details" && <FileDetails file={file} />}
+        </DialogHeader>
+        {["rename", "share", "delete"].includes(value) && (
+          <DialogFooter>
+            <div>
+              <Button onClick={closeAllModals}>Cancel</Button>
+              <Button onClick={handleActions}>
+                <p>{label}</p>
+                {isLoading && <Image />}
+              </Button>
+            </div>
+          </DialogFooter>
+        )}
+      </DialogContent>
+    );
+  };
 
   return (
     <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
@@ -73,6 +116,7 @@ const ActionDropdown = ({ files }: { files: Models.Document }) => {
           ))}
         </DropdownMenuContent>
       </DropdownMenu>
+      {renderDialogContent()}
     </Dialog>
   );
 };
