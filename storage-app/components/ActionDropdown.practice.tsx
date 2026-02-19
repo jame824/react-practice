@@ -43,7 +43,35 @@ const ActionDropdown = ({ files }: { files: Models.Document }) => {
         <DropdownMenuTrigger asChild>
           <Button variant="outline">Open</Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent></DropdownMenuContent>
+        <DropdownMenuContent>
+          <DropdownMenuLabel>{files.name}</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          {actionsDropdownItems.map((actionItem) => (
+            <DropdownMenuItem
+              key={actionItem.value}
+              onClick={() => {
+                setAction(actionItem);
+
+                if (["share"].includes(actionItem.value)) {
+                  setIsDropddownOpen(false);
+                  setIsModalOpen(true);
+                }
+              }}
+            >
+              {actionItem.value === "download" ? (
+                <Link>
+                  <Image />
+                  {actionItem.value}
+                </Link>
+              ) : (
+                <div>
+                  <Image />
+                  {actionItem.value}
+                </div>
+              )}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
       </DropdownMenu>
     </Dialog>
   );
