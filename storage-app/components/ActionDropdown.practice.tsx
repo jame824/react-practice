@@ -38,6 +38,22 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
   const [emails, setEmails] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  // handlers!
+
+  const closeAllModals = () => {
+    setAction(null);
+    setIsModalOpen(false);
+    setIsDropddownOpen(false);
+    setName(file.name);
+  };
+
+  const handleActions = async () => {
+    if (!action) return;
+
+    const success = false;
+    setIsLoading(true);
+  };
+
   const renderDialogContent = () => {
     if (!action) return null;
 
