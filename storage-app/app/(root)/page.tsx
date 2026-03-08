@@ -1,7 +1,10 @@
 import Card from "@/components/Card";
 import { getFiles } from "@/lib/actions/file.actions";
-import { getUsageSummary } from "@/lib/utils";
+import { convertFileSize, getUsageSummary } from "@/lib/utils";
 import { Models } from "node-appwrite";
+import Link from "next/link";
+import Image from "next/image";
+import FormattedDateTime from "@/components/FormattedDateTime";
 
 const Dashboard = async () => {
   const files = await getFiles({ types: [], limit: 10 });
@@ -33,11 +36,23 @@ const Dashboard = async () => {
 
   return (
     <div className="dashboard-container">
-      <div className="dashboard-summary-list">
+      <div>
         Chart
-        <ul>
+        <ul className="dashboard-summary-list">
           {fileUsage.map((object) => (
-            <li key={object.title}>{object.icon}</li>
+            <li key={object.title}>
+              <Link href={object.url} className="dashboard-summary-card">
+                <Image
+                  src={object.icon}
+                  alt="object icon"
+                  width={24}
+                  height={24}
+                />
+                <p>{object.title}</p>
+                <p>{convertFileSize(object.size)}</p>
+                <FormattedDateTime date={object.latestDate} />
+              </Link>
+            </li>
           ))}
         </ul>
       </div>
