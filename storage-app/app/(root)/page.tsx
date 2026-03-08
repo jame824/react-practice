@@ -5,6 +5,7 @@ import { Models } from "node-appwrite";
 import Link from "next/link";
 import Image from "next/image";
 import FormattedDateTime from "@/components/FormattedDateTime";
+import Chart from "@/components/Chart";
 
 const Dashboard = async () => {
   const files = await getFiles({ types: [], limit: 10 });
@@ -37,7 +38,7 @@ const Dashboard = async () => {
   return (
     <div className="dashboard-container">
       <div>
-        Chart
+        <Chart></Chart>
         <ul className="dashboard-summary-list">
           {fileUsage.map((object) => (
             <li key={object.title}>
