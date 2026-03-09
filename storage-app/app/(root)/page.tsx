@@ -10,28 +10,28 @@ import ActionDropdown from "@/components/ActionDropdown";
 import Thumbnail from "@/components/Thumbnail";
 
 const Dashboard = async () => {
-  const mockTotalSpace = {
-    document: {
-      size: 10,
-      latestDate: "2026-10-20",
-    },
-    image: {
-      size: 10,
-      latestDate: "2026-10-20",
-    },
-    video: {
-      size: 10,
-      latestDate: "2026-10-20",
-    },
-    audio: {
-      size: 10,
-      latestDate: "2026-10-20",
-    },
-    other: {
-      size: 10,
-      latestDate: "2026-10-20",
-    },
-  };
+  // const mockTotalSpace = {
+  //   document: {
+  //     size: 10,
+  //     latestDate: "2026-10-20",
+  //   },
+  //   image: {
+  //     size: 10,
+  //     latestDate: "2026-10-20",
+  //   },
+  //   video: {
+  //     size: 10,
+  //     latestDate: "2026-10-20",
+  //   },
+  //   audio: {
+  //     size: 10,
+  //     latestDate: "2026-10-20",
+  //   },
+  //   other: {
+  //     size: 10,
+  //     latestDate: "2026-10-20",
+  //   },
+  // };
 
   const [files, totalSpace] = await Promise.all([
     getFiles({ types: [], limit: 10 }),
