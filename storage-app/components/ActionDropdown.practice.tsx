@@ -48,11 +48,62 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
   };
 
   const handleActions = async () => {
-    if (!action) return;
-
-    const success = false;
+    if (!action) return
+    
+    let success = false;
     setIsLoading(true);
+
+    const action = {
+      rename: () => renameFile(),
+      delete: () => deleteFile(),
+      share: () => updateFileUsers(),
+    }
+
+    success = await (some action)
+
+    if (success) closeAllModals();
+
+    setIsLoading(false);
   };
+
+  const handleRemoveUser = async () => {
+    const updatedEmails = emails.filter
+
+    const success = await updateFileUsers()
+
+    if (success) setEmails(updatedEmails);
+    closeAllModals();
+  }
+
+  const handleActions = async () => {
+    if (!action) return
+
+    setIsLoading(true);
+    let success = false;
+
+    const action = {
+      rename: () => renameFile(),
+      delete: () => deleteFile()
+    }
+
+    const success = await some action
+
+    if (success) closeAllModals();
+    
+    
+    setIsLoading(false);
+  }
+
+  const handleRemoveUser = async () => {
+    const updatedEmails = emails.filter;
+
+    const success = await updateFileUsers()
+
+    if (success) setEmails(updatedEmails)
+
+    closeAllModals();
+
+  }
 
   const renderDialogContent = () => {
     if (!action) return null;
