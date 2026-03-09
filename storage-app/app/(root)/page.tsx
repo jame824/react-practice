@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import FormattedDateTime from "@/components/FormattedDateTime";
 import Chart from "@/components/Chart";
+import { Separator } from "@/components/ui/separator";
 
 const Dashboard = async () => {
   const files = await getFiles({ types: [], limit: 10 });
@@ -33,27 +34,41 @@ const Dashboard = async () => {
     },
   };
 
-  const fileUsage = getUsageSummary(mockTotalSpace);
+  const usageSummary = getUsageSummary(mockTotalSpace);
 
   return (
     <div className="dashboard-container">
       <div>
-        <Chart></Chart>
+        <Chart />
         <ul className="dashboard-summary-list">
-          {fileUsage.map((object) => (
-            <li key={object.title}>
-              <Link href={object.url} className="dashboard-summary-card">
-                <Image
-                  src={object.icon}
-                  alt="object icon"
-                  width={24}
-                  height={24}
+          {usageSummary.map((summary) => (
+            <Link
+              href={summary.url}
+              key={summary.title}
+              className="dashboard-summary-card"
+            >
+              <div className="space-y-4">
+                <div className="flex justify-between gap-3">
+                  <Image
+                    src={summary.icon}
+                    width={100}
+                    height={100}
+                    alt="uploaded image"
+                    className="summary-type-icon"
+                  />
+                  <h4 className="summary-type-size">
+                    {convertFileSize(summary.size) || 0}
+                  </h4>
+                </div>
+
+                <h5 className="summary-type-title">{summary.title}</h5>
+                <Separator className="bg-light-400" />
+                <FormattedDateTime
+                  date={summary.latestDate}
+                  className="text-center"
                 />
-                <p>{object.title}</p>
-                <p>{convertFileSize(object.size)}</p>
-                <FormattedDateTime date={object.latestDate} />
-              </Link>
-            </li>
+              </div>
+            </Link>
           ))}
         </ul>
       </div>
